@@ -71,6 +71,11 @@ app.use(express.json());
 // WARNING: In production, restrict CORS origin
 app.use(cors());
 
+app.get("/", (req, res) => {
+  res.send("EMS Backend is Running ✅");
+});
+
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
