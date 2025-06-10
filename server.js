@@ -241,6 +241,38 @@ app.get('/users-tasks', async (req, res) => {
   }
 });
 
+/**
+ * Reset all tasks and task counts for a single user (employee)
+ */
+app.post('/reset-user-tasks/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Delete all tasks assigned to this user (ensure ObjectId match)
+    await Task.deleteMany({ assignedTo: new mongoose.Types.ObjectId(userId) });
+
+    // Reset this user's taskCounts to zero
+    await User.findByIdAndUpdate(userId, {
+      $set: {
+        'taskCounts.active': 0,
+        'taskCounts.completed': 0,
+        'taskCounts.failed': 0,
+        'taskCounts.new': 0,
+      }
+    });
+
+    res.json({ success: true, message: "User's tasks deleted and task counts reset." });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ------------------
 // Start Server
 // ------------------
